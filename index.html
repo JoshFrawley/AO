@@ -1436,8 +1436,10 @@ var KIT_TEMPLATES={
    STATE + PERSISTENCE
    ============================================================ */
 var STORE_KEY='rafac_wi_generator_v1';
+var UNIT_NAME='1074 (Ellesmere Port) Sqn';
+var UNIT_ADDRESS='Green Ln\nEllesmere Port\nCH65 0DJ';
 function defaultState(){return {
-  unitName:'',unitAddress:'',unitTelephone:'',
+  unitName:UNIT_NAME,unitAddress:UNIT_ADDRESS,unitTelephone:'',
   authorRank:'',authorName:'',authorEmail:'',smsRef:'',
   activityTitle:'',activityLocation:'',what3words:'',activityPostcode:'',
   activityStart:'',activityEnd:'',startTime:'',endTime:'',persTotal:'',
@@ -1459,6 +1461,7 @@ function applyInitialDefaults(){for(var k in DEFAULTS){state[k]=interp(DEFAULTS[
 function hydrate(saved){var d=defaultState();for(var k in d){if(saved[k]!=null)d[k]=saved[k];}
   if(!d._touched)d._touched={};if(!Array.isArray(d.people)||!d.people.length)d.people=peopleSeed();
   ['mel','kit','veh','tasking','mapImages'].forEach(function(c){if(!Array.isArray(d[c]))d[c]=[];});
+  d.unitName=UNIT_NAME;d.unitAddress=UNIT_ADDRESS;
   state=d;}
 
 /* ============================================================
@@ -1470,10 +1473,10 @@ var HEAT_UV_OPTS=['1 - Low (UV 1-2)','2 - Moderate (UV 3-5)','3 - High (UV 6-7)'
 var HEAT_TEMP_OPTS=['1 - Up to 18\u00B0C','2 - 18\u00B0C to 21\u00B0C','3 - 21\u00B0C to 24\u00B0C','4 - 24\u00B0C to 27\u00B0C','5 - Over 27\u00B0C'];
 var STEPS=[
  {id:'unit',title:'Unit & Author',lead:'Who is issuing this instruction. These details form the letterhead and the author signature block.',fields:[
-   {key:'unitName',label:'Unit Name',type:'text',required:true,placeholder:'e.g. 1234 (Town) Sqn',help:'As it appears on official correspondence.'},
+   {key:'unitName',label:'Unit Name',type:'text',locked:true,required:true,placeholder:'e.g. 1234 (Town) Sqn',help:'As it appears on official correspondence.'},
    {key:'smsRef',label:'SMS Reference',type:'text',required:true,placeholder:'e.g. SQN/1234/PPE/YY/NNNN',help:'The reference of the supporting SMS event.'},
    {key:'unitTelephone',label:'Unit Telephone Number',type:'tel',required:true,placeholder:'e.g. 01234 567890'},
-   {key:'unitAddress',label:'Unit Address',type:'textarea',required:true,full:true,rows:3,placeholder:'Building / Street\nTown\nPostcode'},
+   {key:'unitAddress',label:'Unit Address',type:'textarea',locked:true,required:true,full:true,rows:3,placeholder:'Building / Street\nTown\nPostcode'},
    {key:'_sub1',label:'Author / Activity IC',type:'subhead'},
    {key:'authorRank',label:'Your Rank',type:'select',options:RANKS,required:true},
    {key:'authorName',label:'Your Name',type:'text',required:true,placeholder:'e.g. Jane Smith'},
@@ -1547,6 +1550,7 @@ function fieldNode(f){
   else if(f.type==='select'){input=el('select');var o='<option value="">- select -</option>';(f.options||[]).forEach(function(x){o+='<option value="'+esc(x)+'">'+esc(x)+'</option>';});input.innerHTML=o;}
   else{input=el('input');input.type=f.type||'text';}
   input.id=id;input.dataset.key=f.key;
+  if(f.locked){input.readOnly=true;input.style.background='#f1f3f5';input.style.cursor='not-allowed';input.title='Fixed for 1074 (Ellesmere Port) Sqn';}
   if(f.placeholder)input.placeholder=f.placeholder;
   if(f.type==='number'&&f.min!=null)input.min=f.min;
   var val=state[f.key];if(val!=null)input.value=val;
@@ -2703,7 +2707,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     var display = pick(['PreferredName','SPS-DisplayName','DisplayName']) || fbName || '';
     var email   = pick(['WorkEmail','SPS-UserPrincipalName']) || fbEmail || '';
     var office  = pick(['Office','SPS-Location','OfficeLocation','SPS-Department','Department']);
-    setIfEmpty('unitName',   office);                       // officeLocation -> Unit Name
     setIfEmpty('authorName', (given+' '+surname).trim());   // givenName + surname -> Author
     setIfEmpty('authorEmail',email);                        // mail -> Email
     setRank(deriveRank(display,given,surname));             // displayName -> Rank
